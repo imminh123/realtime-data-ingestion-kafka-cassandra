@@ -147,6 +147,7 @@ Here tenants will specify how they want **mysimbdp** to execute **clientbatching
   {SOURCE_PATH}/{CLIENT_ID}/out
   ```
   
+In this case, using Pandas, we've perform `data wrangling` by dropping all rows with NULL values from the DataFrame.
 
 ## 3. Design of mysimbdp-batchingestmanager
 ![Design of mysimbdp-batchingestmanager](https://github.com/imminh123/realtime-data-ingestion-kafka-cassandra/blob/main/assets/batchingestmanager.png?raw=true)
@@ -204,11 +205,35 @@ The **mysimbdp_coredms** cluster which is the platform's data warehouse will be 
 
 ### Implementation
 
-To be added
+**Performance**: 
+With 1 Kafka node, 4 nodes of Cassandra (replication = 2). Batch size (sink) = 32 and batch size (source) = 2000. Our platform is capable of ingesting over 6000 records per minutes.
+
+**Error**
+Exception happen when schema configuration provided by client does not adhere to data file constrain, with limited processing power, this cause our **coredms** to crashed after a few seconds.
+
+**Violation of constraints**: the data file constrain has specified the pattern for accepted file `"input.file.pattern": ".*\\.csv$"`. Thus any file that does not match this pattern will be ignore without any log.
+
+```
+2024-03-15 12:29:51    statement: INSERT INTO mysimbdp_coredms.analytics(provincecode,deviceid,ifindex,frame,slot,port,onuindex,onuid,time,speedin,speedout) VALUES (:provincecode,:deviceid,:ifindex,:frame,:slot,:port,:onuindex,:onuid,:time,:speedin,:speedout) USING TIMESTAMP :kafka_internal_timestamp} (com.datastax.oss.kafka.sink.CassandraSinkTask)
+2024-03-15 12:29:51 [2024-03-15 10:29:51,878] WARN Error inserting/updating row for Kafka record SinkRecord{kafkaOffset=300156, timestampType=CreateTime, originalTopic=locations, originalKafkaPartition=0, originalKafkaOffset=300156} ConnectRecord{topic='locations', kafkaPartition=0, key=Struct{}, keySchema=Schema{com.github.jcustenborder.kafka.connect.model.Key:STRUCT}, value=Struct{PROVINCECODE=HKD,DEVICEID=2222771642618,IFINDEX=6828878457269,FRAME=1,SLOT=1,PORT=13,ONUINDEX=6,ONUID=222277164261810113006,TIME=01/08/2019 11:38:33,SPEEDIN=541783,SPEEDOUT=29639}, valueSchema=Schema{com.github.jcustenborder.kafka.connect.model.Value:STRUCT}, timestamp=1710453148320, headers=ConnectHeaders(headers=[ConnectHeader(key=file.name, value=ONUData-sample_min_1 23.08.58.csv, schema=Schema{STRING}), ConnectHeader(key=file.name.without.extension, value=ONUData-sample_min_1 23.08.58, schema=Schema{STRING}), ConnectHeader(key=file.path, value=/data/input/ONUData-sample_min_1 23.08.58.csv, schema=Schema{STRING}), ConnectHeader(key=file.parent.dir.name, value=input, schema=Schema{STRING}), ConnectHeader(key=file.length, value=48728, schema=Schema{INT32}), ConnectHeader(key=file.offset, value=6, schema=Schema{INT8}), ConnectHeader(key=file.last.modified, value=Thu Mar 14 21:52:27 UTC 2024, schema=Schema{org.apache.kafka.connect.data.Timestamp:INT64}), ConnectHeader(key=file.relative.path, value=ONUData-sample_min_1 23.08.58.csv, schema=Schema{STRING})])}: All 1 node(s) tried for the query failed (showing first 1 nodes, use getAllErrors() for more): Node(endPoint=cassandra1/192.168.128.6:9042, hostId=93e66b37-98b8-45bc-af26-3773f2b4455e, hashCode=27e50f4f): [com.datastax.oss.driver.api.core.servererrors.UnavailableException: Not enough replicas available for query at consistency LOCAL_ONE (1 required but only 0 alive)]
+```
 
 
 ## 5. Logging
+As the platform relies on Kafka Connector, which ultilize `log4j` for log configuration. At the momment, our platform collects log by overwriting configuration of `log4j` with our own `/ingestion/connector/config/connect-log4j.properties`.
+All logs file will be stored under `/ingestion/logs`.
+- `logs/kafka`: Store logs regarding Kafka & Kafka Connect, collect progess of file ingestion, failed, successful operations.
+- `logs/cassandra`: Store all DEBUG logs from Cassandra stdout, failed, succeeded operations.
 
+```
+code/docker-compose.yaml
+
+      - ./ingestion/connector/config/connect-log4j.properties:/etc/kafka/connect-log4j.properties
+      - ./ingestion/logs/kafka:/var/log/kafka
+      - ./ingestion/logs/cassandra:/var/log/cassandra
+```
+
+As the logs are unstructured data, our platform need to have a dedicate logic component, could be another pipeline to pre-process those data before it can be used for any insight.
 
 ---
 
@@ -241,6 +266,29 @@ The way **clientstreamingestapp** and **clientbatchingestapp** handling data fil
 
 Thus **clientstreamingestapp** need to watch the CHANGE in `{SOURCE_PATH}/{CLIENT_ID}/in` directory, using whatever technique that the chosen language capable of. (For example [watchdog](https://pypi.org/project/watchdog/) in Python is a powerful library for observing file changes).
 
+
+## 3. Develop & test
+The program that take data as input and perform data wrangling for streaming app is the exact same as batch ingestion app. Thus, the performance, error, log, and exception are similar. <br>
+
+In this case, using Pandas, we've perform `data wrangling` by dropping all rows with NULL values from the DataFrame.
+
+## 4. Report
+This can refer to answer 3.1 on how our platform can implement a mechanism for client app to report its metric, including components, flows and the mechanism for reporting. <br>
+
+As clientstreamingestapp is implemented by client, it's important that we must have a clear, structured format of report, or any logging produced. <br>
+A sample structured
+```
+{
+  "start": "2024-03-15T11:00:00Z",
+  "end": "2024-03-15T12:00:00Z",
+  "average_time": 0.05,
+  "total_data_size": 2048,
+  "number_of_records": 600000
+}
+```
+## 5. Alert & Scalling
+Unfortunately there's not enough time for me to implement this. However, the way I would do this is to setup a cronjob to periodically fetch new report files from client, and base on the content, giving instruction to **streamingestmanager** to scale up/down our instance for **clientstreamingestapp**.
+It would be easier to leverage feature of cloud providers. For example with AWS, we can use Cloud Watch alert to trigger EC2 auto scalling group, notify admin or trigger an action in EKS.
 
 # Part 3 - Integration and Extension 
 ## 1. Logging and Monitoring

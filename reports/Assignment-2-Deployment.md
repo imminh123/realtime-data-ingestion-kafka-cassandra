@@ -137,6 +137,10 @@ The program is located in `code/client-batch-ingestion/client`.
 npm run dev
 ```
 
+![system](https://github.com/imminh123/realtime-data-ingestion-kafka-cassandra/blob/main/assets/sample_client_web_ui.jpg?raw=true)
+
+
+
 
 
 

@@ -1,38 +1,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment
-  labels:
-    app: nginx
+  name: client-stream-ingestion-deployment
 spec:
+  replicas: 1 
   selector:
     matchLabels:
-      app: nginx
-  replicas: 3
+      app: client-stream-ingestion
   template:
     metadata:
       labels:
-        app: nginx
+        app: client-stream-ingestion
     spec:
       containers:
-      - name: nginx
-        image: docker.io/cse4100/kubernetes-custom-nginx:1.0
-        ports:
-        - containerPort: 80
+      - name: client-stream-ingestion-cron
+        image: client-stream-ingestion:latest
+        imagePullPolicy: Never
+        env:
+          - name: SOURCE_PATH
+            value: "/data"
+          - name: CLIENT_ID
+            value: "1"
         volumeMounts:
-        - name: auth-volume
-          mountPath: /etc/serviceproxy/
-        - name: nginx-config-volume
-          mountPath: /etc/nginx/conf.d/
+          - name: data-volume
+            mountPath: /data
         resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
           limits:
-            cpu: "100m"
-            memory: "16Mi"
+            memory: "128Mi"
+            cpu: "500m"
       volumes:
-      - name: nginx-config-volume
-        configMap:
-          name: config
-      - name: auth-volume
-        secret: 
-         secretName: nginx-auth
-
+      - name: data-volume
+        hostPath:
+          path: /data/client-staging-input-directory

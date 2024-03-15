@@ -62,7 +62,8 @@ services:
     volumes:
       - ./ingestion/data:/data
       - ./ingestion/connector/config/connect-log4j.properties:/etc/kafka/connect-log4j.properties
-      - ./ingestion/logs:/var/log/kafka/connect.log
+      - ./ingestion/logs/kafka:/var/log/kafka
+      - ./ingestion/logs/cassandra:/var/log/cassandra
 
     networks:
       - kafka-bdp

@@ -11,4 +11,5 @@ COPY . /app
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
 # Run app.py when the container launches
-CMD ["python", "main.py"]
+# CMD ["python", "clientstreamingestapp.py"]
+CMD ["python", "clientbatchingestapp.py"]
