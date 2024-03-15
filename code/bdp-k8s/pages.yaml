@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pages
+data:
+  index.html: |
+    <!DOCTYPE HTML>
+    <html>
+      <body>
+        <h1>Hello Kubernetes!</h1>
+      </body>
+    </html>

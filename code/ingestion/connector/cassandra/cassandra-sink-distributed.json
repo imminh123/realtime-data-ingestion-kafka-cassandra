@@ -1,0 +1,34 @@
+{
+    "name": "cassandra-sink",
+    "config": {
+        "connector.class": "com.datastax.oss.kafka.sink.CassandraSinkConnector",
+        "tasks.max": "1",
+        "topics": "locations",
+        "contactPoints": "cassandra1",
+        "loadBalancing.localDc": "helsinki",
+        "port": 9042,
+        "ignoreErrors": "None",
+        "maxConcurrentRequests": 500,
+        "maxNumberOfRecordsInBatch": 32,
+        "queryExecutionTimeout": 30,
+        "connectionPoolLocalSize": 4,
+        "jmx": true,
+        "compression": "None",
+
+        "auth.provider": "None",
+        
+        "topic.locations.mysimbdp_coredms.analytics.mapping": "provincecode=value.PROVINCECODE,deviceid=value.DEVICEID,ifindex=value.IFINDEX,frame=value.FRAME,slot=value.SLOT,port=value.PORT,onuindex=value.ONUINDEX,onuid=value.ONUID,time=value.TIME,speedin=value.SPEEDIN,speedout=value.SPEEDOUT",
+        "topic.locations.mysimbdp_coredms.analytics.consistencyLevel": "LOCAL_ONE",
+        "topic.locations.mysimbdp_coredms.analytics.ttl": -1,
+        "topic.locations.mysimbdp_coredms.analytics.ttlTimeUnit" : "SECONDS",
+        "topic.locations.mysimbdp_coredms.analytics.timestampTimeUnit" : "MICROSECONDS",
+        "topic.locations.mysimbdp_coredms.analytics.nullToUnset": "true",
+        "topic.locations.mysimbdp_coredms.analytics.deletesEnabled": "true",
+        "topic.locations.codec.locale": "en_US",
+        "topic.locations.codec.timeZone": "UTC",
+        "topic.locations.codec.timestamp": "CQL_TIMESTAMP",
+        "topic.locations.codec.date": "ISO_LOCAL_DATE",
+        "topic.locations.codec.time": "ISO_LOCAL_TIME",
+        "topic.locations.codec.unit": "MILLISECONDS"
+    }
+}

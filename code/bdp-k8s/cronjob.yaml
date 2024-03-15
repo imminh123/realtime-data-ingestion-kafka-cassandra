@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: client-batch-ingestion-cron-1
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: client-batch-ingestion-cron
+            image: client-batch-ingestion:latest
+            imagePullPolicy: Never
+            env:
+              - name: SOURCE_PATH
+                value: "/data"
+              - name: CLIENT_ID
+                value: "1"
+            volumeMounts:
+              - name: data-volume
+                mountPath: /data
+            resources:
+              requests:
+                memory: "64Mi"
+                cpu: "250m"
+              limits:
+                memory: "128Mi"
+                cpu: "500m"
+          volumes:
+          - name: data-volume
+            hostPath:
+              path: /data/client-staging-input-directory
+          restartPolicy: OnFailure

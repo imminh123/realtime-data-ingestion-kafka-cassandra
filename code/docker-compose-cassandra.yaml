@@ -14,9 +14,19 @@ x-expose: &exposes
     - "9142" 
     - "9160" 
 
+x-base: &base
+  image: cassandra:latest
+  networks:
+      - kafka-bdp
+
+networks:
+  kafka-bdp:
+    name: kafka-bdp
+    driver: bridge
+
 services: 
   cassandra1:
-    image: cassandra:latest
+    <<: *base
     hostname: cassandra1
     environment: 
       <<: *cassandras
@@ -27,7 +37,7 @@ services:
       - "9042:9042"
 
   cassandra2:
-    image: cassandra:latest
+    <<: *base
     hostname: cassandra2
     environment: 
       <<: *cassandras
@@ -42,7 +52,7 @@ services:
     
 
   cassandra3:
-    image: cassandra:latest
+    <<: *base
     hostname: cassandra3
     environment: 
       <<: *cassandras
@@ -56,7 +66,7 @@ services:
       - "9044:9042"
 
   cassandra4:
-    image: cassandra:latest
+    <<: *base
     hostname: cassandra4
     environment: 
       <<: *cassandras

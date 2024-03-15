@@ -1,0 +1,15 @@
+{
+  "client": "client_a",
+  "data_retention_period_days": "7",
+  "schedule": "*/1 * * * *",
+  "resources": {
+    "requests": {
+      "memory": "64Mi",
+      "cpu": "250m"
+    },
+    "limits": {
+      "memory": "128Mi",
+      "cpu": "500m"
+    }
+  }
+}

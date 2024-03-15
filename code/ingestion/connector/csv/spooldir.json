@@ -1,0 +1,12 @@
+{
+    "tasks.max": "1",
+    "connector.class": "com.github.jcustenborder.kafka.connect.spooldir.SpoolDirCsvSourceConnector",
+    "input.path": "/data/input",
+    "input.file.pattern": "csv-spooldir-source.csv",
+    "schema.generation.enabled": "true",
+    "error.path": "/data/error",
+    "finished.path": "/data/finished",
+    "halt.on.error": "false",
+    "topic": "locations",
+    "csv.first.row.as.header": "true"
+}

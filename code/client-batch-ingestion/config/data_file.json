@@ -1,0 +1,26 @@
+{
+  "name": "speed-tracking-data",
+  "supported_file_types": ["csv"],
+  "key_space": "mysimbdp_coredms",
+  "csv.first.row.as.header": "true",
+  "schema": {
+    "type": "record",
+    "name": "analytics", 
+    "fields": [
+      { "name": "PROVINCECODE", "type": "string" },
+      { "name": "DEVICEID", "type": "string" },
+      { "name": "IFINDEX", "type": "int" },
+      { "name": "FRAME", "type": "int" },
+      { "name": "SLOT", "type": "int" },
+      { "name": "PORT", "type": "int" },
+      { "name": "ONUINDEX", "type": "int" },
+      { "name": "ONUID", "type": "int" },
+      { "name": "TIME", "type": "string" },
+      { "name": "SPEEDIN", "type": "double" },
+      { "name": "SPEEDOUT", "type": "double" }
+    ]
+  },
+  "primary_key": ["PROVINCECODE", "DEVICEID", "ONUID"],
+  "max_file_size_mb": 50
+}
+
